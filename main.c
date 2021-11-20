@@ -63,7 +63,10 @@ char ** parse_args(char * line){
 
 	char ** args = calloc((argCount + 1), 8);
 
-	char * token = strsep(&line, " ");
+	char * permLine = calloc(strlen(line), 1);
+	strcpy(permLine, line);
+
+	char * token = strsep(&permLine, " ");
 
 	int i = 0;
 
@@ -73,7 +76,7 @@ char ** parse_args(char * line){
 	}
 
 	while (token){
-		token = strsep(&line, " ");
+		token = strsep(&permLine, " ");
 		//printf("%d\n", strcmp(token, " "));
 		args[i] = token;
 		//printf("%d: %s\n", i, args[i]);
@@ -82,6 +85,8 @@ char ** parse_args(char * line){
 
 	args[i] = NULL;
 
+	free(copied);
+
 	return args;
 }
 
@@ -89,12 +94,13 @@ char ** parse_args(char * line){
 	Args:
 		char * command: raw user inputted command that user wants to run
 	Function:
-		Executes the command that the user wants to run using helper functions
+		Executes the command that the user wants to run using helper functions that parse the args
 	Returns:
 		void
 */
 void execute(char * command){
-	char ** args = parse_args(format_command(command));
+	char * formattedCommand = format_command(command);
+	char ** args = parse_args(formattedCommand);
 
 	int subprocess = fork();
 
@@ -104,18 +110,42 @@ void execute(char * command){
 	} else {
 		int status = 0;
 		int waitStatus = wait(&status);
-		printf("CHILD PROCESS HAS COMPLETED\n");
+		//printf("CHILD PROCESS HAS COMPLETED\n");
+		free(formattedCommand);
+		int i = 0;
+		for (i = 0; i < (sizeof(args)/8) - 1; i++){
+			if (args[i]){
+				free(args[i]);
+			}
+		}
 	}
 }
 
 int main(){
-	char test[100] = "   ls       -a    -l";
+	int running = 1;
+
+	while (running){
+		char * holder;
+		printf("\033[0;31m");
+		printf("Shell $: ");
+		printf("\033[0m");
+		fflush(stdout);
+		read(STDIN_FILENO, holder, 256);
+
+		holder = strsep(&holder, "\n");
+		//printf("%s\n", holder);
+
+		execute(holder);
+		//printf("\n");
+	}
+
+	/*char test[100] = "   ls       -a    -l";
 	//char test[] = "ls";
 	//printf("%s\n", format_command(test));
 
 	char ** args = parse_args(format_command(test));
 
 	execute(test);
-
+	*/
 	return 0;
 }
