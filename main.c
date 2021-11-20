@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+#include "commands.h"
+
 /*
 	Args:
 		char * line: string to be cleaned
@@ -98,7 +100,7 @@ char ** parse_args(char * line){
 	Returns:
 		void
 */
-void execute(char * command){
+int execute(char * command){
 	char * formattedCommand = format_command(command);
 	char ** args = parse_args(formattedCommand);
 
@@ -106,8 +108,24 @@ void execute(char * command){
 
 	//child process
 	if (subprocess == 0){
-		execvp(args[0], args);
+		if (strcmp(args[0], "cd") == 0){
+			//printf("%s\n", args[1]);
+			args[1] = strsep(args + 1, "\t");
+			return cd(args[1]);
+		} else if (strcmp(args[0], "exit") == 0){
+			cexit();
+		} else {
+			int status = execvp(args[0], args);
+
+			if (errno){
+				printf("%s\n", strerror(errno));
+			}
+			return status;
+		}
 	} else {
+		if (strcmp(args[0], "exit") == 0){
+			cexit();
+		}
 		int status = 0;
 		int waitStatus = wait(&status);
 		//printf("CHILD PROCESS HAS COMPLETED\n");
@@ -118,6 +136,8 @@ void execute(char * command){
 				free(args[i]);
 			}
 		}
+
+		return WEXITSTATUS(status);
 	}
 }
 
@@ -130,8 +150,10 @@ int main(){
 		printf("Shell $: ");
 		printf("\033[0m");
 		fflush(stdout);
-		read(STDIN_FILENO, holder, 256);
+		//read(STDIN_FILENO, holder, 256);
+		fgets(holder, 256, stdin);
 
+		//printf("%s\n", holder);
 		holder = strsep(&holder, "\n");
 		//printf("%s\n", holder);
 
