@@ -4,8 +4,8 @@
 #include <unistd.h>
 
 /*
-cleans up char * line so that repetitive spaces are removed.
-returns a cleaned up string that should only have spaces where neccessary.
+	Cleans up char * line so that repetitive spaces are removed.
+	Returns a cleaned up string that should only have spaces where neccessary.
 */
 char * format_command(char * line){
 	char * newCommand = calloc(strlen(line), 1);
@@ -36,38 +36,31 @@ char * format_command(char * line){
 	return newCommand;
 }
 
+/*
+	Assumes that the given char * line was cleaned using format_command.
+	returns char ** that is ready to be execvp'ed.
+*/
 char ** parse_args(char * line){
-	char * copied = malloc(strlen(line));
+	char * copied = calloc(strlen(line), 1);
 	strcpy(copied, line);
 
-	char * spaceToken = strsep(&copied, " ");
-	int countArgs = 0;
-	/*if (spaceToken || strlen(line) > 0){
-		countArgs = countArgs + 1;
-	}*/
-
-	while (spaceToken){
-		spaceToken = strsep(&copied, " ");
-		countArgs = countArgs + 1;
+	int argCount = 0;
+	while (strsep(&copied, " ")){
+		argCount = argCount + 1;
 	}
 
-	//printf("%d\n", countArgs);
+	//printf("%d\n", argCount);
 
-	char ** args = malloc((countArgs + 1) * 8);
+	char ** args = calloc((argCount + 1), 8);
 
-	char * token = strsep(&line, " "); //" ls -a"
-
-	//printf("%s\n", token);
+	char * token = strsep(&line, " ");
 
 	int i = 0;
 
-	if (!token){
+	if (token){
 		args[0] = token;
 		i = 1;
 	}
-
-	//printf("%d: %s\n", 0, args[0]);
-
 
 	while (token){
 		token = strsep(&line, " ");
@@ -79,16 +72,15 @@ char ** parse_args(char * line){
 
 	args[i] = NULL;
 
-
 	return args;
 }
 
 int main(){
-	char test[100] = "   ls       -a    -b";
+	char test[100] = "   ls       -a    -l";
+	//char test[] = "ls";
+	//printf("%s\n", format_command(test));
 
-	printf("%s\n", format_command(test));
-
-	char ** args = parse_args(test);
+	char ** args = parse_args(format_command(test));
 
 	execvp(args[0], args);
 
