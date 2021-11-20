@@ -2,10 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 /*
-	Cleans up char * line so that repetitive spaces are removed.
-	Returns a cleaned up string that should only have spaces where neccessary.
+	Args:
+		char * line: string to be cleaned
+	Function:
+		Cleans up char * line so that repetitive spaces are removed.
+	Returns:
+		a cleaned up string that should only have spaces where neccessary.
 */
 char * format_command(char * line){
 	char * newCommand = calloc(strlen(line), 1);
@@ -37,8 +42,13 @@ char * format_command(char * line){
 }
 
 /*
-	Assumes that the given char * line was cleaned using format_command.
-	returns char ** that is ready to be execvp'ed.
+	Args:
+		char * line: string to be parsed into a char ** using spaces as separators
+	Function:
+		Assumes that the given char * line was cleaned using format_command.
+		Parses string and puts argument into a char ** that is execvp-ready.
+	Returns:
+		char ** that is ready to be execvp'ed.
 */
 char ** parse_args(char * line){
 	char * copied = calloc(strlen(line), 1);
@@ -75,6 +85,29 @@ char ** parse_args(char * line){
 	return args;
 }
 
+/*
+	Args:
+		char * command: raw user inputted command that user wants to run
+	Function:
+		Executes the command that the user wants to run using helper functions
+	Returns:
+		void
+*/
+void execute(char * command){
+	char ** args = parse_args(format_command(command));
+
+	int subprocess = fork();
+
+	//child process
+	if (subprocess == 0){
+		execvp(args[0], args);
+	} else {
+		int status = 0;
+		int waitStatus = wait(&status);
+		printf("CHILD PROCESS HAS COMPLETED\n");
+	}
+}
+
 int main(){
 	char test[100] = "   ls       -a    -l";
 	//char test[] = "ls";
@@ -82,7 +115,7 @@ int main(){
 
 	char ** args = parse_args(format_command(test));
 
-	execvp(args[0], args);
+	execute(test);
 
 	return 0;
 }
