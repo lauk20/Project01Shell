@@ -98,11 +98,16 @@ char ** parse_args(char * line){
 	Function:
 		Executes the command that the user wants to run using helper functions that parse the args
 	Returns:
-		void
+		int: WEXITSTATUS
 */
 int execute(char * command){
 	char * formattedCommand = format_command(command);
 	char ** args = parse_args(formattedCommand);
+
+	if (strcmp(args[0], "exit") == 0){
+		cexit();
+		return 0;
+	}
 
 	int subprocess = fork();
 
@@ -114,17 +119,28 @@ int execute(char * command){
 			return cd(args[1]);
 		} else if (strcmp(args[0], "exit") == 0){
 			cexit();
+			return 0;
 		} else {
 			int status = execvp(args[0], args);
 
 			if (errno){
 				printf("%s\n", strerror(errno));
 			}
-			return status;
+
+			free(formattedCommand);
+			int i = 0;
+			for (i = 0; i < (sizeof(args)/8) - 1; i++){
+				if (args[i]){
+					free(args[i]);
+				}
+			}
+
+			exit(status);
 		}
 	} else {
 		if (strcmp(args[0], "exit") == 0){
 			cexit();
+			return 0;
 		}
 		int status = 0;
 		int waitStatus = wait(&status);
@@ -137,6 +153,7 @@ int execute(char * command){
 			}
 		}
 
+		kill(subprocess, 6);
 		return WEXITSTATUS(status);
 	}
 }
@@ -148,6 +165,7 @@ int main(){
 		char * holder;
 		printf("\033[0;31m");
 		printf("Shell $: ");
+		//printf("PID: %d ", getpid());
 		printf("\033[0m");
 		fflush(stdout);
 		//read(STDIN_FILENO, holder, 256);
