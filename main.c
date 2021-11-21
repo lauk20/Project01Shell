@@ -152,8 +152,7 @@ int execute(char * command){
 				free(args[i]);
 			}
 		}
-
-		kill(subprocess, 6);
+		
 		return WEXITSTATUS(status);
 	}
 }
