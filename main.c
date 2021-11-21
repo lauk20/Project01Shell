@@ -117,9 +117,6 @@ int execute(char * command){
 			//printf("%s\n", args[1]);
 			args[1] = strsep(args + 1, "\t");
 			return cd(args[1]);
-		} else if (strcmp(args[0], "exit") == 0){
-			cexit();
-			return 0;
 		} else {
 			int status = execvp(args[0], args);
 
@@ -138,10 +135,6 @@ int execute(char * command){
 			exit(status);
 		}
 	} else {
-		if (strcmp(args[0], "exit") == 0){
-			cexit();
-			return 0;
-		}
 		int status = 0;
 		int waitStatus = wait(&status);
 		//printf("CHILD PROCESS HAS COMPLETED\n");
@@ -152,7 +145,7 @@ int execute(char * command){
 				free(args[i]);
 			}
 		}
-		
+
 		return WEXITSTATUS(status);
 	}
 }
