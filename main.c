@@ -109,6 +109,9 @@ int execute(char * command){
 		return 0;
 	}
 
+	printf("%s\n", formattedCommand);
+	printf("%s %s %s\n", args[0], args[1], args[2]);
+
 	int subprocess = fork();
 
 	//child process
@@ -118,8 +121,9 @@ int execute(char * command){
 			args[1] = strsep(args + 1, "\t");
 			return cd(args[1]);
 		} else {
+			printf("before\n");
 			int status = execvp(args[0], args);
-
+			printf("after\n");
 			if (errno){
 				printf("%s\n", strerror(errno));
 			}
@@ -131,12 +135,12 @@ int execute(char * command){
 					free(args[i]);
 				}
 			}
-
+			printf("exited\n");
 			exit(status);
 		}
 	} else {
 		int status = 0;
-		int waitStatus = wait(&status);
+		int waitStatus = waitpid(subprocess, &status, 0);
 		//printf("CHILD PROCESS HAS COMPLETED\n");
 		free(formattedCommand);
 		int i = 0;
@@ -150,6 +154,22 @@ int execute(char * command){
 	}
 }
 
+int multiexecute(char * command){
+	char * heapCommand = calloc(strlen(command), 1);
+	strcpy(heapCommand, command);
+	char * token = strsep(&heapCommand, ";");
+
+	while (token){
+		//printf("%s\n", token);
+		execute(token);
+		token = strsep(&heapCommand, ";");
+	}
+
+	free(heapCommand);
+
+	return 0;
+}
+
 int main(){
 	int running = 1;
 
@@ -157,17 +177,17 @@ int main(){
 		char * holder;
 		printf("\033[0;31m");
 		printf("Shell $: ");
-		//printf("PID: %d ", getpid());
+		printf("PID: %d ", getpid());
 		printf("\033[0m");
 		fflush(stdout);
 		//read(STDIN_FILENO, holder, 256);
 		fgets(holder, 256, stdin);
 
-		//printf("%s\n", holder);
+		//printf("before: %s\n", holder);
 		holder = strsep(&holder, "\n");
-		//printf("%s\n", holder);
+		//printf("after : %s\n", holder);
 
-		execute(holder);
+		multiexecute(holder);
 		//printf("\n");
 	}
 
