@@ -152,6 +152,15 @@ int execute(char * command){
 	}
 }
 
+/*
+	Args:
+		char * command: raw user inputted command that user wants to run
+	Function:
+		Executes the command that the user wants to run using execute function.
+		Can handle multiple commands separated by the ";"
+	Returns:
+		int: 0
+*/
 int multiexecute(char * command){
 	char * heapCommand = calloc(strlen(command), 1);
 	strcpy(heapCommand, command);
@@ -172,11 +181,16 @@ int multiexecute(char * command){
 int main(){
 	int running = 1;
 
+	printf("\033[0;31m");
+	printf("\033[1m");
+	printf("WELCOME TO SHELL\n");
+	printf("\033[0");
+
 	while (running){
 		char * holder = calloc(256, 1);
 		printf("\033[0;31m");
 		printf("Shell $: ");
-		printf("PID: %d ", getpid());
+		//printf("PID: %d ", getpid());
 		printf("\033[0m");
 		fflush(stdout);
 		//read(STDIN_FILENO, holder, 256);
