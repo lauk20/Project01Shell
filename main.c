@@ -101,6 +101,7 @@ char ** parse_args(char * line){
 		int: WEXITSTATUS
 */
 int execute(char * command){
+	//printf("raw cmd %ld: %s\n", strlen(command), command);
 	char * formattedCommand = format_command(command);
 	char ** args = parse_args(formattedCommand);
 
@@ -109,8 +110,8 @@ int execute(char * command){
 		return 0;
 	}
 
-	printf("%s\n", formattedCommand);
-	printf("%s %s %s\n", args[0], args[1], args[2]);
+	//printf("%ld is len: %s\n", strlen(formattedCommand), formattedCommand);
+	//printf("%s %s %s\n", args[0], args[1], args[2]);
 
 	int subprocess = fork();
 
@@ -121,9 +122,7 @@ int execute(char * command){
 			args[1] = strsep(args + 1, "\t");
 			return cd(args[1]);
 		} else {
-			printf("before\n");
 			int status = execvp(args[0], args);
-			printf("after\n");
 			if (errno){
 				printf("%s\n", strerror(errno));
 			}
@@ -135,7 +134,6 @@ int execute(char * command){
 					free(args[i]);
 				}
 			}
-			printf("exited\n");
 			exit(status);
 		}
 	} else {
@@ -157,10 +155,11 @@ int execute(char * command){
 int multiexecute(char * command){
 	char * heapCommand = calloc(strlen(command), 1);
 	strcpy(heapCommand, command);
+	//printf("heapCommand: %s\n", heapCommand);
 	char * token = strsep(&heapCommand, ";");
 
 	while (token){
-		//printf("%s\n", token);
+		//printf("token: %s\n", token);
 		execute(token);
 		token = strsep(&heapCommand, ";");
 	}
@@ -174,7 +173,7 @@ int main(){
 	int running = 1;
 
 	while (running){
-		char * holder;
+		char * holder = calloc(256, 1);
 		printf("\033[0;31m");
 		printf("Shell $: ");
 		printf("PID: %d ", getpid());
@@ -184,11 +183,20 @@ int main(){
 		fgets(holder, 256, stdin);
 
 		//printf("before: %s\n", holder);
-		holder = strsep(&holder, "\n");
-		//printf("after : %s\n", holder);
 
+		int i = 0;
+		while (i < strlen(holder)){
+			if (holder[i] == '\n'){
+				holder[i] = '\0';
+			}
+			i = i + 1;
+		}
+		//printf("after : %s\n", holder);
 		multiexecute(holder);
-		//printf("\n");
+
+		if (errno){
+			printf("%s\n", strerror(errno));
+		}
 	}
 
 	/*char test[100] = "   ls       -a    -l";
