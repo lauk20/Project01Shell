@@ -176,19 +176,25 @@ int execute(char * command){
 				if (formattedCommand - 1 && *(formattedCommand-1) == '>'){
 					duped = dup(STDOUT_FILENO);
 					//printf("FC\n");
-					token = mystrsep(&formattedCommand, ">", "<");
-					printf("TOKEN: %s\n", token);
+					token = format_command(mystrsep(&formattedCommand, ">", "<"));
+					printf("TOKEN:%s\n", token);
+					printf("FORMED:%s\n", formattedCommand);
 					char * filename = calloc(strlen(token), 1);
-					if (formattedCommand - token > 0){
-						strncpy(filename, format_command(token), formattedCommand - token - 1);
+					//printf("CLEAN: %s\n", cleanedCommand);
+					printf("EEEEK%ld", strlen(token) - strlen(formattedCommand));
+					if (strlen(token) - strlen(formattedCommand) > 0){
+						strncpy(filename, token, strlen(token) - strlen(formattedCommand) - 1);
 					} else {
-						strcpy(filename, format_command(token));
+						strcpy(filename, token);
 					}
-					int replace = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
+					char * fixedfilename = format_command(filename);
+					int replace = open(fixedfilename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
 					printf("FILENAME: %s\n", filename);
+					
 					redirect_file(replace, STDOUT_FILENO);
 
 					free(filename);
+					free(fixedfilename);
 				}
 
 				int status = execvp(args[0], args);
