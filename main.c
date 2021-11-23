@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include "commands.h"
 
@@ -92,6 +93,34 @@ char ** parse_args(char * line){
 	return args;
 }
 
+char * mystrsep(char ** string, char * delim, char * delim2){
+	int i = 0;
+
+	char * token = *string;
+
+	//printf("%d %s\n", strlen(*string), *string);
+	while (i < strlen(*string)){
+		//printf("o%d %c\n", i, *(*string + i));
+		if (*(*string + i) == *delim | *(*string + i) == *delim2){
+			//printf("WEWEWE%s\n", *string);
+			//*(*string + i) = '\0';
+			*string = *string + i + 1;
+
+			return token;
+		}
+
+		i = i + 1;
+	}
+	//printf("end\n");
+	return token;
+}
+
+int redirect_file(int this, int withThis){
+	int newfd = dup2(this, withThis);
+
+	return newfd;
+}
+
 /*
 	Args:
 		char * command: raw user inputted command that user wants to run
@@ -113,43 +142,92 @@ int execute(char * command){
 	//printf("%ld is len: %s\n", strlen(formattedCommand), formattedCommand);
 	//printf("%s %s %s\n", args[0], args[1], args[2]);
 
-	int subprocess = fork();
-
-	//child process
-	if (subprocess == 0){
-		if (strcmp(args[0], "cd") == 0){
-			//printf("%s\n", args[1]);
-			args[1] = strsep(args + 1, "\t");
-			return cd(args[1]);
+	char * token = mystrsep(&formattedCommand, ">", "<");
+	//printf("TOKENheader: %s\n", token);
+	//printf("oooo\n");
+	while(token){
+		//printf("ENTEREWHILE\n");
+		char * separatedCommand = calloc(strlen(token), 1);
+		//printf("HALLLLO123123O\n");
+		//printf("%s FOOOOO\n", formattedCommand);
+		if (formattedCommand - token > 0){
+			strncpy(separatedCommand, token, formattedCommand - token - 1);
 		} else {
-			int status = execvp(args[0], args);
-			if (errno){
-				printf("%s\n", strerror(errno));
-			}
+			strcpy(separatedCommand, token);
+		}
+		//printf("HALLLLOO\n");
+		char * cleaned = format_command(separatedCommand);
+		args = parse_args(cleaned);
+		//printf("TOKEN: %s\n", separatedCommand);
+		//printf("ARGS: %s %s\n", args[1], args[2]);
+		//printf("BEFORE FORK\n");
+		int subprocess = fork();
 
-			free(formattedCommand);
+		//child process
+		if (subprocess == 0){
+			if (strcmp(args[0], "cd") == 0){
+				//printf("%s\n", args[1]);
+				args[1] = strsep(args + 1, "\t");
+				return cd(args[1]);
+			} else {
+				//printf("ENTERED\n");
+				//printf("FORMATTED CMD: %c\n", *(formattedCommand - 1));
+				int duped = -1;
+				if (formattedCommand - 1 && *(formattedCommand-1) == '>'){
+					duped = dup(STDOUT_FILENO);
+					//printf("FC\n");
+					token = mystrsep(&formattedCommand, ">", "<");
+					printf("TOKEN: %s\n", token);
+					char * filename = calloc(strlen(token), 1);
+					if (formattedCommand - token > 0){
+						strncpy(filename, format_command(token), formattedCommand - token - 1);
+					} else {
+						strcpy(filename, format_command(token));
+					}
+					int replace = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
+					printf("FILENAME: %s\n", filename);
+					redirect_file(replace, STDOUT_FILENO);
+
+					free(filename);
+				}
+
+				int status = execvp(args[0], args);
+				if (errno){
+					if (duped > -1){
+						redirect_file(duped, STDOUT_FILENO);
+					}
+					printf("%s\n", strerror(errno));
+				}
+
+				int i = 0;
+				for (i = 0; i < (sizeof(args)/8) - 1; i++){
+					if (args[i]){
+						free(args[i]);
+					}
+				}
+				free(separatedCommand);
+				exit(status);
+			}
+		} else {
+			int status = 0;
+			int waitStatus = waitpid(subprocess, &status, 0);
+			//printf("CHILD PROCESS HAS COMPLETED\n");
 			int i = 0;
 			for (i = 0; i < (sizeof(args)/8) - 1; i++){
 				if (args[i]){
 					free(args[i]);
 				}
 			}
-			exit(status);
-		}
-	} else {
-		int status = 0;
-		int waitStatus = waitpid(subprocess, &status, 0);
-		//printf("CHILD PROCESS HAS COMPLETED\n");
-		free(formattedCommand);
-		int i = 0;
-		for (i = 0; i < (sizeof(args)/8) - 1; i++){
-			if (args[i]){
-				free(args[i]);
-			}
+
+			free(separatedCommand);
+
+			return WEXITSTATUS(status);
 		}
 
-		return WEXITSTATUS(status);
+		token = mystrsep(&formattedCommand, ">", "<");
 	}
+
+	free(formattedCommand);
 }
 
 /*
@@ -213,6 +291,8 @@ int main(){
 		if (errno){
 			printf("%s\n", strerror(errno));
 		}
+
+		free(holder);
 	}
 
 	/*char test[100] = "   ls       -a    -l";
