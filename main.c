@@ -274,6 +274,14 @@ int execute(char * command){
 					redirect_file(replace, STDOUT_FILENO);
 					
 					args[x] = 0;
+				} else if (strcmp(args[x], "<") == 0 && args[x] != NULL){
+					char * filename = args[x + 1];
+					int replace = open(filename, O_RDONLY, 0664);
+					//printf("FILENAME: %s\n", filename);
+
+					redirect_file(replace, STDIN_FILENO);
+					
+					args[x] = 0;
 				}
 			}
 			//printf("aaa\n");
