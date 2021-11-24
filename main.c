@@ -256,7 +256,28 @@ int execute(char * command){
 			args[1] = strsep(args + 1, "\t");
 			return cd(args[1]);
 		} else {
-			char * tokenParse = calloc(strlen(formattedCommand), 1);
+			int counter = 0;
+			while (args[counter]){
+				counter = counter + 1;
+			}
+			//printf("wherea am i %d\n", counter);
+			int x = 0;
+			//printf("%s %s %s!\n", args[0], args[1], args[2]);
+			//printf("%ld\n", sizeof(*args));
+			for (x = 0; x < counter; x++){
+				//printf("aa%s\n", args[x]);
+				if (strcmp(args[x], ">") == 0 && args[x] != NULL){
+					char * filename = args[x + 1];
+					int replace = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
+					//printf("FILENAME: %s\n", filename);
+
+					redirect_file(replace, STDOUT_FILENO);
+					
+					args[x] = 0;
+				}
+			}
+			//printf("aaa\n");
+			/*char * tokenParse = calloc(strlen(formattedCommand), 1);
 			strcpy(tokenParse, formattedCommand);
 			char * token = mystrsep(&tokenParse, ">", "<");
 			printf("TOKEN1%s\n", token);
@@ -272,6 +293,7 @@ int execute(char * command){
 			}
 			printf("HELLO\n");
 			printf("0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
+			*/
 			int status = execvp(args[0], args);
 			if (errno){
 				printf("%s\n", strerror(errno));
