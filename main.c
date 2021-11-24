@@ -103,7 +103,7 @@ char * mystrsep(char ** string, char * delim, char * delim2){
 		//printf("o%d %c\n", i, *(*string + i));
 		if (*(*string + i) == *delim | *(*string + i) == *delim2){
 			//printf("WEWEWE%s\n", *string);
-			//*(*string + i) = '\0';
+			*(*string + i) = '\0';
 			*string = *string + i + 1;
 
 			return token;
@@ -112,6 +112,8 @@ char * mystrsep(char ** string, char * delim, char * delim2){
 		i = i + 1;
 	}
 	//printf("end\n");
+	*string = NULL;
+	printf("mystrsep%s\n", token);
 	return token;
 }
 
@@ -129,7 +131,7 @@ int redirect_file(int this, int withThis){
 	Returns:
 		int: WEXITSTATUS
 */
-int execute(char * command){
+/*int execute(char * command){
 	//printf("raw cmd %ld: %s\n", strlen(command), command);
 	char * formattedCommand = format_command(command);
 	char ** args = parse_args(formattedCommand);
@@ -190,7 +192,7 @@ int execute(char * command){
 					char * fixedfilename = format_command(filename);
 					int replace = open(fixedfilename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
 					printf("FILENAME: %s\n", filename);
-					
+
 					redirect_file(replace, STDOUT_FILENO);
 
 					free(filename);
@@ -234,6 +236,68 @@ int execute(char * command){
 	}
 
 	free(formattedCommand);
+}*/
+
+int execute(char * command){
+	//printf("raw cmd %ld: %s\n", strlen(command), command);
+	char * formattedCommand = format_command(command);
+	char ** args = parse_args(formattedCommand);
+	if (strcmp(args[0], "exit") == 0){
+		cexit();
+		return 0;
+	}
+	//printf("%ld is len: %s\n", strlen(formattedCommand), formattedCommand);
+	//printf("%s %s %s\n", args[0], args[1], args[2]);
+	int subprocess = fork();
+	//child process
+	if (subprocess == 0){
+		if (strcmp(args[0], "cd") == 0){
+			//printf("%s\n", args[1]);
+			args[1] = strsep(args + 1, "\t");
+			return cd(args[1]);
+		} else {
+			char * tokenParse = calloc(strlen(formattedCommand), 1);
+			strcpy(tokenParse, formattedCommand);
+			char * token = mystrsep(&tokenParse, ">", "<");
+			printf("TOKEN1%s\n", token);
+			if (token){
+				printf("TOKENPARSE%s\n", tokenParse);
+				token = mystrsep(&tokenParse, ">", "<");
+			}
+			printf("TOKEN%s\n", token);
+			printf("TOKENPARSE%s\n", tokenParse);
+			while (token){
+				printf("TOKEN%s\n", token);
+				token = mystrsep(&tokenParse, ">", "<");
+			}
+			printf("HELLO\n");
+			printf("0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
+			int status = execvp(args[0], args);
+			if (errno){
+				printf("%s\n", strerror(errno));
+			}
+			free(formattedCommand);
+			int i = 0;
+			for (i = 0; i < (sizeof(args)/8) - 1; i++){
+				if (args[i]){
+					free(args[i]);
+				}
+			}
+			exit(status);
+		}
+	} else {
+		int status = 0;
+		int waitStatus = waitpid(subprocess, &status, 0);
+		//printf("CHILD PROCESS HAS COMPLETED\n");
+		free(formattedCommand);
+		int i = 0;
+		for (i = 0; i < (sizeof(args)/8) - 1; i++){
+			if (args[i]){
+				free(args[i]);
+			}
+		}
+		return WEXITSTATUS(status);
+	}
 }
 
 /*
