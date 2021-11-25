@@ -155,16 +155,20 @@ int execute(char * command){
 	if (strcmp(args[0], "exit") == 0){
 		cexit();
 		return 0;
+	} else if (strcmp(args[0], "cd") == 0){
+		//printf("%s\n", args[1]);
+		args[1] = strsep(args + 1, "\t");
+		return (cd(args[1]));
 	}
 	//printf("%ld is len: %s\n", strlen(formattedCommand), formattedCommand);
 	//printf("%s %s %s\n", args[0], args[1], args[2]);
 	int subprocess = fork();
 	//child process
 	if (subprocess == 0){
-		if (strcmp(args[0], "cd") == 0){
+		if (0){ // always false clean up later if remember and if time, but not important
 			//printf("%s\n", args[1]);
 			args[1] = strsep(args + 1, "\t");
-			return cd(args[1]);
+			exit(cd(args[1]));
 		} else {
 			int duped = -1;
 			int replaced = -1;
@@ -247,8 +251,9 @@ int execute(char * command){
 						close(pipefd[0]);
 						close(pipefd[1]);
 
+						free(formattedCommand);
 						formattedCommand = format_command(cmd2);
-						args = parse_args(formattedCommand);
+						//args = parse_args(formattedCommand);
 						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
 						//execvp(args[0], args);
 						//printf("fc: %s\n", formattedCommand);
@@ -264,6 +269,8 @@ int execute(char * command){
 						close(pipefd[0]);
 						close(pipefd[1]);
 
+						free(formattedCommand);
+						free(args);
 						formattedCommand = format_command(cmd);
 						args = parse_args(formattedCommand);
 						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
