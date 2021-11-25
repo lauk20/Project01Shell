@@ -244,7 +244,7 @@ int execute(char * command){
 	//printf("raw cmd %ld: %s\n", strlen(command), command);
 	char * formattedCommand = format_command(command);
 	char ** args = parse_args(formattedCommand);
-	
+
 	if (strcmp(args[0], "exit") == 0){
 		cexit();
 		return 0;
@@ -259,6 +259,9 @@ int execute(char * command){
 			args[1] = strsep(args + 1, "\t");
 			return cd(args[1]);
 		} else {
+			int duped = -1;
+			int replaced = -1;
+
 			int counter = 0;
 			while (args[counter]){
 				counter = counter + 1;
@@ -274,6 +277,8 @@ int execute(char * command){
 					int replace = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
 					//printf("FILENAME: %s 0: %s, 1: %s\n", filename, args[x], args[x + 1]);
 
+					duped = dup(STDOUT_FILENO);
+					replaced = STDOUT_FILENO;
 					redirect_file(replace, STDOUT_FILENO);
 
 					args[x] = 0;
@@ -282,30 +287,20 @@ int execute(char * command){
 					int replace = open(filename, O_RDONLY, 0664);
 					//printf("FILENAME: %s\n", filename);
 
+					duped = dup(STDIN_FILENO);
+					replaced = STDIN_FILENO;
 					redirect_file(replace, STDIN_FILENO);
 
 					args[x] = 0;
 				}
 			}
-			//printf("aaa\n");
-			/*char * tokenParse = calloc(strlen(formattedCommand), 1);
-			strcpy(tokenParse, formattedCommand);
-			char * token = mystrsep(&tokenParse, ">", "<");
-			printf("TOKEN1%s\n", token);
-			if (token){
-				printf("TOKENPARSE%s\n", tokenParse);
-				token = mystrsep(&tokenParse, ">", "<");
-			}
-			printf("TOKEN%s\n", token);
-			printf("TOKENPARSE%s\n", tokenParse);
-			while (token){
-				printf("TOKEN%s\n", token);
-				token = mystrsep(&tokenParse, ">", "<");
-			}
-			printf("HELLO\n");
-			printf("0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
-			*/
+
 			int status = execvp(args[0], args);
+
+			if (duped > -1){
+				redirect_file(duped, replaced);
+			}
+
 			if (errno){
 				printf("%s\n", strerror(errno));
 			}
