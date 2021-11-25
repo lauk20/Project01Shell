@@ -12,6 +12,7 @@
 		char * line: string to be cleaned
 	Function:
 		Cleans up char * line so that repetitive spaces are removed.
+		Spaces are added, if needed, before and after the redirection and piping characters.
 	Returns:
 		a cleaned up string that should only have spaces where neccessary.
 */
@@ -37,7 +38,19 @@ char * format_command(char * line){
 				lastSpace = 0;
 			}
 
-			strncat(newCommand, line + i, 1);
+			if (line[i] == '>' || line [i] == '<' || line[i] == '|'){
+				if (i > 1 && line[i - 1] != ' '){
+					strcat(newCommand, " ");
+				}
+
+				strncat(newCommand, line + i, 1);
+
+				if (i < strlen(line) - 1 && line[i + 1] != ' '){
+					strcat(newCommand, " ");
+				}
+			} else {
+				strncat(newCommand, line + i, 1);
+			}
 		}
 
 		i = i + 1;
@@ -130,8 +143,9 @@ int redirect_file(int this, int withThis){
 		char * command: raw user inputted command that user wants to run
 	Function:
 		Executes the command that the user wants to run using helper functions that parse the args
+		Redirection and piping are handled in this function along with the execution of commands.
 	Returns:
-		int: WEXITSTATUS
+		int: WEXITSTATUS - exit status of the child processes
 */
 int execute(char * command){
 	//printf("raw cmd %ld: %s\n", strlen(command), command);
