@@ -17,7 +17,7 @@
 		a cleaned up string that should only have spaces where neccessary.
 */
 char * format_command(char * line){
-	char * newCommand = calloc(strlen(line), 1);
+	char * newCommand = calloc(strlen(line) + 1, 1);
 
 	int i = 0;
 	char * start = 0;
@@ -70,6 +70,7 @@ char * format_command(char * line){
 */
 char ** parse_args(char * line){
 	char * copied = calloc(strlen(line), 1);
+
 	strcpy(copied, line);
 
 	int argCount = 0;
@@ -105,9 +106,23 @@ char ** parse_args(char * line){
 
 	free(copied);
 
+	//printf("parg %s\n", line);
+
 	return args;
 }
 
+/*
+	THIS FUNCTION ENDED UP NEVER BEING USED SO IT MAY NOT WORK AS INTENDED
+		BECAUSE IT WAS BARELY TESTED.
+	Args:
+		char * string: string to find tokens in
+		char * delim: first delimiter
+		char * delim2: second delimiter
+	Function:
+		Like the strsep function except it can take in two delimiters and use both to find tokens.
+	Returns:
+		char *: the token,
+*/
 char * mystrsep(char ** string, char * delim, char * delim2){
 	int i = 0;
 
@@ -150,7 +165,10 @@ int redirect_file(int this, int withThis){
 int execute(char * command){
 	//printf("raw cmd %ld: %s\n", strlen(command), command);
 	char * formattedCommand = format_command(command);
+	//printf("OGBP: %s\n", formattedCommand);
 	char ** args = parse_args(formattedCommand);
+	//printf("raw: %s\n", command);
+	//printf("OG: %s\n", formattedCommand);
 
 	if (strcmp(args[0], "exit") == 0){
 		cexit();
@@ -204,7 +222,6 @@ int execute(char * command){
 
 					args[x] = 0;
 				} else if (strcmp(args[x], "|") == 0 && args[x] != NULL){
-					FILE * file;
 					char cmd[256];
 					char cmd2[256];
 
@@ -246,25 +263,42 @@ int execute(char * command){
 
 					pid_secondcmd = fork();
 
-					if (pid_secondcmd == 0){
+					if (pid_secondcmd == 0){ //child process
 						dup2(pipefd[0], STDIN_FILENO);
 						close(pipefd[0]);
 						close(pipefd[1]);
 
-						free(formattedCommand);
+						//free(formattedCommand);
+						//printf("BFfc %s\n", formattedCommand);
 						formattedCommand = format_command(cmd2);
 						//args = parse_args(formattedCommand);
 						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
 						//execvp(args[0], args);
 						//printf("fc: %s\n", formattedCommand);
+						//printf("fc %s\n", formattedCommand);
+						//printf("cmd2 %s\n", cmd2);
 						int stat = execute(formattedCommand);
 						//printf("ERROR\n");
+						//printf("Freeing in 0\n");
+						if (formattedCommand){
+							formattedCommand = NULL;
+							free(formattedCommand);
+						}
+						if (args[0]){
+							args[0] = NULL;
+							free(args[0]);
+						}
+						if (args){
+							args = NULL;
+							free(args);
+						}
+
 						exit(stat);
 					}
 
 					pid_firstcmd = fork();
 
-					if (pid_firstcmd == 0){
+					if (pid_firstcmd == 0){ //child process
 						dup2(pipefd[1], STDOUT_FILENO);
 						close(pipefd[0]);
 						close(pipefd[1]);
@@ -275,7 +309,23 @@ int execute(char * command){
 						args = parse_args(formattedCommand);
 						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
 						execvp(args[0], args);
-						printf("ERROR\n");
+
+						if (errno){
+							printf("%s\n", strerror(errno));
+						}
+						//printf("Freeing in 1\n");
+						if (formattedCommand){
+							formattedCommand = NULL;
+							free(formattedCommand);
+						}
+						if (args[0]){
+							args[0] = NULL;
+							free(args[0]);
+						}
+						if (args){
+							args = NULL;
+							free(args);
+						}
 
 						exit(-1);
 					}
@@ -288,33 +338,6 @@ int execute(char * command){
 
 					waitpid(pid_firstcmd, &status1, 0);
 					waitpid(pid_secondcmd, &status2, 0);
-
-					//char * newCMD  = calloc(strlen(formattedCommand) + 2560, 1);
-					/*iter = x + 1;
-					while (iter < counter){
-						if (strcmp(args[iter], ">") == 0 || strcmp(args[iter], "<") == 0 || strcmp(args[iter], "|") == 0){
-							strcat(newCMD, result);
-							strcat(newCMD, " ");
-						}
-						strcat(newCMD, args[iter]);
-						strcat(newCMD, " ");
-
-						iter = iter + 1;
-					}
-
-					int i = 0;
-					for (i = 0; i < (sizeof(args)/8) - 1; i++){
-						if (args[i]){
-							free(args[i]);
-						}
-					}
-
-					free(formattedCommand);
-
-					formattedCommand = format_command(newCMD);
-					args = parse_args(formattedCommand);
-					printf("0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
-					*/
 
 					args[x] = 0;
 
@@ -332,12 +355,18 @@ int execute(char * command){
 			if (errno){
 				printf("%s\n", strerror(errno));
 			}
-			free(formattedCommand);
-			int i = 0;
-			for (i = 0; i < counter - 1; i++){
-				if (args[i]){
-					free(args[i]);
-				}
+			//printf("Freeing in 2\n");
+			if (formattedCommand){
+				formattedCommand = NULL;
+				free(formattedCommand);
+			}
+			if (args[0]){
+				args[0] = NULL;
+				free(args[0]);
+			}
+			if (args){
+				args = NULL;
+				free(args);
 			}
 
 			exit(status);
@@ -346,13 +375,20 @@ int execute(char * command){
 		int status = 0;
 		int waitStatus = waitpid(subprocess, &status, 0);
 		//printf("CHILD PROCESS HAS COMPLETED\n");
-		free(formattedCommand);
-		int i = 0;
-		for (i = 0; i < (sizeof(args)/8) - 1; i++){
-			if (args[i]){
-				free(args[i]);
-			}
+		//printf("Freeing in 3\n");
+		if (formattedCommand){
+			//printf("fc\n");
+			free(formattedCommand);
 		}
+		/*if (args[0]){
+			printf("a0 %s\n", args[0]);
+			free(args[0]);
+		}*/
+		if (args){
+			//printf("args\n");
+			free(args);
+		}
+
 		return WEXITSTATUS(status);
 	}
 }
@@ -374,7 +410,10 @@ int multiexecute(char * command){
 
 	while (token){
 		//printf("token: %s\n", token);
-		execute(token);
+		int status = execute(token);
+		if (status != 0){
+			return status;
+		}
 		token = strsep(&heapCommand, ";");
 	}
 
