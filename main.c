@@ -280,7 +280,7 @@ int execute(char * command){
 						int stat = execute(formattedCommand);
 						//printf("ERROR\n");
 						//printf("Freeing in 0\n");
-						if (formattedCommand){
+						/*if (formattedCommand){
 							formattedCommand = NULL;
 							free(formattedCommand);
 						}
@@ -291,7 +291,7 @@ int execute(char * command){
 						if (args){
 							args = NULL;
 							free(args);
-						}
+						}*/
 
 						exit(stat);
 					}
@@ -303,8 +303,8 @@ int execute(char * command){
 						close(pipefd[0]);
 						close(pipefd[1]);
 
-						free(formattedCommand);
-						free(args);
+						//free(formattedCommand);
+						//free(args);
 						formattedCommand = format_command(cmd);
 						args = parse_args(formattedCommand);
 						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
@@ -314,7 +314,7 @@ int execute(char * command){
 							printf("%s\n", strerror(errno));
 						}
 						//printf("Freeing in 1\n");
-						if (formattedCommand){
+						/*if (formattedCommand){
 							formattedCommand = NULL;
 							free(formattedCommand);
 						}
@@ -325,7 +325,7 @@ int execute(char * command){
 						if (args){
 							args = NULL;
 							free(args);
-						}
+						}*/
 
 						exit(-1);
 					}
@@ -356,7 +356,7 @@ int execute(char * command){
 				printf("%s\n", strerror(errno));
 			}
 			//printf("Freeing in 2\n");
-			if (formattedCommand){
+			/*if (formattedCommand){
 				formattedCommand = NULL;
 				free(formattedCommand);
 			}
@@ -367,7 +367,7 @@ int execute(char * command){
 			if (args){
 				args = NULL;
 				free(args);
-			}
+			}*/
 
 			exit(status);
 		}
@@ -376,18 +376,20 @@ int execute(char * command){
 		int waitStatus = waitpid(subprocess, &status, 0);
 		//printf("CHILD PROCESS HAS COMPLETED\n");
 		//printf("Freeing in 3\n");
-		if (formattedCommand){
+		/*if (formattedCommand){
 			//printf("fc\n");
 			free(formattedCommand);
-		}
+		}*/
 		/*if (args[0]){
 			printf("a0 %s\n", args[0]);
 			free(args[0]);
 		}*/
-		if (args){
-			//printf("args\n");
+		/*if (args){
+			printf("args\n");
 			free(args);
-		}
+			//args = NULL;
+		}*/
+		//printf("completed free\n");
 
 		return WEXITSTATUS(status);
 	}
