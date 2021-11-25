@@ -22,11 +22,13 @@ char * format_command(char * line){
 	char * start = 0;
 	char * lastSpace = 0;
 	while (i < strlen(line)){
-		if (line[i] == ' '){
+		//printf("%ld NEWCOMMAND: %s\n", strlen(newCommand), newCommand);
+		if (line[i] == ' ' || line[i] == '\t'){
 				lastSpace = line + i;
 		} else {
+			//printf("%d\n", line[i]);
 			if (lastSpace && start){
-				strncat(newCommand, lastSpace, 1);
+				strcat(newCommand, " ");
 				lastSpace = 0;
 			}
 
@@ -40,7 +42,7 @@ char * format_command(char * line){
 
 		i = i + 1;
 	}
-
+	//printf("eNEWCOMMAND: %s\n", newCommand);
 	return newCommand;
 }
 
@@ -242,6 +244,7 @@ int execute(char * command){
 	//printf("raw cmd %ld: %s\n", strlen(command), command);
 	char * formattedCommand = format_command(command);
 	char ** args = parse_args(formattedCommand);
+	
 	if (strcmp(args[0], "exit") == 0){
 		cexit();
 		return 0;
@@ -269,10 +272,10 @@ int execute(char * command){
 				if (strcmp(args[x], ">") == 0 && args[x] != NULL){
 					char * filename = args[x + 1];
 					int replace = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
-					//printf("FILENAME: %s\n", filename);
+					//printf("FILENAME: %s 0: %s, 1: %s\n", filename, args[x], args[x + 1]);
 
 					redirect_file(replace, STDOUT_FILENO);
-					
+
 					args[x] = 0;
 				} else if (strcmp(args[x], "<") == 0 && args[x] != NULL){
 					char * filename = args[x + 1];
@@ -280,7 +283,7 @@ int execute(char * command){
 					//printf("FILENAME: %s\n", filename);
 
 					redirect_file(replace, STDIN_FILENO);
-					
+
 					args[x] = 0;
 				}
 			}
