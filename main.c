@@ -133,113 +133,6 @@ int redirect_file(int this, int withThis){
 	Returns:
 		int: WEXITSTATUS
 */
-/*int execute(char * command){
-	//printf("raw cmd %ld: %s\n", strlen(command), command);
-	char * formattedCommand = format_command(command);
-	char ** args = parse_args(formattedCommand);
-
-	if (strcmp(args[0], "exit") == 0){
-		cexit();
-		return 0;
-	}
-
-	//printf("%ld is len: %s\n", strlen(formattedCommand), formattedCommand);
-	//printf("%s %s %s\n", args[0], args[1], args[2]);
-
-	char * token = mystrsep(&formattedCommand, ">", "<");
-	//printf("TOKENheader: %s\n", token);
-	//printf("oooo\n");
-	while(token){
-		//printf("ENTEREWHILE\n");
-		char * separatedCommand = calloc(strlen(token), 1);
-		//printf("HALLLLO123123O\n");
-		//printf("%s FOOOOO\n", formattedCommand);
-		if (formattedCommand - token > 0){
-			strncpy(separatedCommand, token, formattedCommand - token - 1);
-		} else {
-			strcpy(separatedCommand, token);
-		}
-		//printf("HALLLLOO\n");
-		char * cleaned = format_command(separatedCommand);
-		args = parse_args(cleaned);
-		//printf("TOKEN: %s\n", separatedCommand);
-		//printf("ARGS: %s %s\n", args[1], args[2]);
-		//printf("BEFORE FORK\n");
-		int subprocess = fork();
-
-		//child process
-		if (subprocess == 0){
-			if (strcmp(args[0], "cd") == 0){
-				//printf("%s\n", args[1]);
-				args[1] = strsep(args + 1, "\t");
-				return cd(args[1]);
-			} else {
-				//printf("ENTERED\n");
-				//printf("FORMATTED CMD: %c\n", *(formattedCommand - 1));
-				int duped = -1;
-				if (formattedCommand - 1 && *(formattedCommand-1) == '>'){
-					duped = dup(STDOUT_FILENO);
-					//printf("FC\n");
-					token = format_command(mystrsep(&formattedCommand, ">", "<"));
-					printf("TOKEN:%s\n", token);
-					printf("FORMED:%s\n", formattedCommand);
-					char * filename = calloc(strlen(token), 1);
-					//printf("CLEAN: %s\n", cleanedCommand);
-					printf("EEEEK%ld", strlen(token) - strlen(formattedCommand));
-					if (strlen(token) - strlen(formattedCommand) > 0){
-						strncpy(filename, token, strlen(token) - strlen(formattedCommand) - 1);
-					} else {
-						strcpy(filename, token);
-					}
-					char * fixedfilename = format_command(filename);
-					int replace = open(fixedfilename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
-					printf("FILENAME: %s\n", filename);
-
-					redirect_file(replace, STDOUT_FILENO);
-
-					free(filename);
-					free(fixedfilename);
-				}
-
-				int status = execvp(args[0], args);
-				if (errno){
-					if (duped > -1){
-						redirect_file(duped, STDOUT_FILENO);
-					}
-					printf("%s\n", strerror(errno));
-				}
-
-				int i = 0;
-				for (i = 0; i < (sizeof(args)/8) - 1; i++){
-					if (args[i]){
-						free(args[i]);
-					}
-				}
-				free(separatedCommand);
-				exit(status);
-			}
-		} else {
-			int status = 0;
-			int waitStatus = waitpid(subprocess, &status, 0);
-			//printf("CHILD PROCESS HAS COMPLETED\n");
-			int i = 0;
-			for (i = 0; i < (sizeof(args)/8) - 1; i++){
-				if (args[i]){
-					free(args[i]);
-				}
-			}
-
-			free(separatedCommand);
-
-			return WEXITSTATUS(status);
-		}
-
-		token = mystrsep(&formattedCommand, ">", "<");
-	}
-
-	free(formattedCommand);
-}*/
-
 int execute(char * command){
 	//printf("raw cmd %ld: %s\n", strlen(command), command);
 	char * formattedCommand = format_command(command);
@@ -292,9 +185,123 @@ int execute(char * command){
 					redirect_file(replace, STDIN_FILENO);
 
 					args[x] = 0;
+				} else if (strcmp(args[x], "|") == 0 && args[x] != NULL){
+					FILE * file;
+					char cmd[256];
+					char cmd2[256];
+
+					int iter = 0;
+					strncpy(cmd, "", 256);
+					strncpy(cmd2, "", 256);
+
+					while (iter < x){
+						//printf("%d %s\n", iter, args[iter]);
+						if (args[iter] != NULL){
+							strcat(cmd, args[iter]);
+							strcat(cmd, " ");
+						}
+						iter = iter + 1;
+					}
+
+					iter = iter + 1;
+					while (args[iter]){//} && *args[iter] != '>' && *args[iter] != '<' && *args[iter] != '|'){
+						strcat(cmd2, args[iter]);
+						strcat(cmd2, " ");
+						//printf("ADDED: %s\n", args[iter]);
+						iter = iter + 1;
+					}
+
+					//printf("CMD:>%s\n", cmd);
+					//printf("CMD2:>%s\n", cmd2);
+
+					/*duped = dup(STDOUT_FILENO);
+					replaced = STDOUT_FILENO;
+					redirect_file(STDIN_FILENO, STDOUT_FILENO);*/
+					int pipefd[2];
+
+					if (pipe(pipefd) == -1){
+						exit(-1);
+					}
+
+					int pid_firstcmd;
+					int pid_secondcmd;
+
+					pid_secondcmd = fork();
+
+					if (pid_secondcmd == 0){
+						dup2(pipefd[0], STDIN_FILENO);
+						close(pipefd[0]);
+						close(pipefd[1]);
+
+						formattedCommand = format_command(cmd2);
+						args = parse_args(formattedCommand);
+						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
+						//execvp(args[0], args);
+						//printf("fc: %s\n", formattedCommand);
+						int stat = execute(formattedCommand);
+						//printf("ERROR\n");
+						exit(stat);
+					}
+
+					pid_firstcmd = fork();
+
+					if (pid_firstcmd == 0){
+						dup2(pipefd[1], STDOUT_FILENO);
+						close(pipefd[0]);
+						close(pipefd[1]);
+
+						formattedCommand = format_command(cmd);
+						args = parse_args(formattedCommand);
+						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
+						execvp(args[0], args);
+						printf("ERROR\n");
+
+						exit(-1);
+					}
+
+					close(pipefd[0]);
+					close(pipefd[1]);
+
+					int status1 = 0;
+					int status2 = 0;
+
+					waitpid(pid_firstcmd, &status1, 0);
+					waitpid(pid_secondcmd, &status2, 0);
+
+					//char * newCMD  = calloc(strlen(formattedCommand) + 2560, 1);
+					/*iter = x + 1;
+					while (iter < counter){
+						if (strcmp(args[iter], ">") == 0 || strcmp(args[iter], "<") == 0 || strcmp(args[iter], "|") == 0){
+							strcat(newCMD, result);
+							strcat(newCMD, " ");
+						}
+						strcat(newCMD, args[iter]);
+						strcat(newCMD, " ");
+
+						iter = iter + 1;
+					}
+
+					int i = 0;
+					for (i = 0; i < (sizeof(args)/8) - 1; i++){
+						if (args[i]){
+							free(args[i]);
+						}
+					}
+
+					free(formattedCommand);
+
+					formattedCommand = format_command(newCMD);
+					args = parse_args(formattedCommand);
+					printf("0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
+					*/
+
+					args[x] = 0;
+
+					exit(0);
 				}
 			}
-
+			/*printf("ABC\n");
+			printf("0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);*/
 			int status = execvp(args[0], args);
 
 			if (duped > -1){
@@ -306,11 +313,12 @@ int execute(char * command){
 			}
 			free(formattedCommand);
 			int i = 0;
-			for (i = 0; i < (sizeof(args)/8) - 1; i++){
+			for (i = 0; i < counter - 1; i++){
 				if (args[i]){
 					free(args[i]);
 				}
 			}
+
 			exit(status);
 		}
 	} else {
