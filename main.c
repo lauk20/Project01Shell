@@ -68,8 +68,8 @@ char * format_command(char * line){
 	Returns:
 		char ** that is ready to be execvp'ed.
 */
-char ** parse_args(char * line){
-	char * copied = calloc(strlen(line), 1);
+char * parse_args(char * line, char ** args){
+	char * copied = calloc(strlen(line) + 1, 1);
 
 	strcpy(copied, line);
 
@@ -80,9 +80,9 @@ char ** parse_args(char * line){
 
 	//printf("%d\n", argCount);
 
-	char ** args = calloc((argCount + 1), 8);
+	//args = calloc((argCount + 1) + 1, 8);
 
-	char * permLine = calloc(strlen(line), 1);
+	char * permLine = calloc(strlen(line) + 1, 1);
 	strcpy(permLine, line);
 
 	char * token = strsep(&permLine, " ");
@@ -108,7 +108,7 @@ char ** parse_args(char * line){
 
 	//printf("parg %s\n", line);
 
-	return args;
+	return permLine;
 }
 
 /*
@@ -147,6 +147,19 @@ char * mystrsep(char ** string, char * delim, char * delim2){
 	return token;
 }
 
+/*
+	This function is useless, it just calls dup2 and returns what dup2 returns.
+	It used to do something but it has since been changed.
+	It is still in use, so removing it would require editing other parts of the program.
+	So, it stays.
+	Args:
+		int this: File Descriptor of new file that will replace withThis.
+		int withThis: File Descriptor of the file to be replaced
+	Function:
+		dup2(this, withThis)
+	Returns:
+		returns dupe2(this, withThis).
+*/
 int redirect_file(int this, int withThis){
 	int newfd = dup2(this, withThis);
 
@@ -166,7 +179,21 @@ int execute(char * command){
 	//printf("raw cmd %ld: %s\n", strlen(command), command);
 	char * formattedCommand = format_command(command);
 	//printf("OGBP: %s\n", formattedCommand);
-	char ** args = parse_args(formattedCommand);
+	char * copied = calloc(strlen(formattedCommand) + 1, 1);
+
+	strcpy(copied, formattedCommand);
+
+	int argCount = 0;
+	while (strsep(&copied, " ")){
+		argCount = argCount + 1;
+	}
+
+	//printf("%d\n", argCount);
+
+	char ** args = calloc((argCount + 1) + 1, 8);
+	char * permline = parse_args(formattedCommand, args);
+
+	free(copied);
 	//printf("raw: %s\n", command);
 	//printf("OG: %s\n", formattedCommand);
 
@@ -215,7 +242,16 @@ int execute(char * command){
 					char * filename = args[x + 1];
 					int replace = open(filename, O_RDONLY, 0664);
 					//printf("FILENAME: %s\n", filename);
+					if (replace == -1){
+						if (errno){
+							printf("%s\n", strerror(errno));
+						}
+						free(formattedCommand);
+						free(args);
+						free(permline);
 
+						exit(replace);
+					}
 					duped = dup(STDIN_FILENO);
 					replaced = STDIN_FILENO;
 					redirect_file(replace, STDIN_FILENO);
@@ -270,6 +306,7 @@ int execute(char * command){
 
 						//free(formattedCommand);
 						//printf("BFfc %s\n", formattedCommand);
+						free(formattedCommand);
 						formattedCommand = format_command(cmd2);
 						//args = parse_args(formattedCommand);
 						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
@@ -293,6 +330,10 @@ int execute(char * command){
 							free(args);
 						}*/
 
+						free(formattedCommand);
+						free(args);
+						free(permline);
+
 						exit(stat);
 					}
 
@@ -306,7 +347,7 @@ int execute(char * command){
 						//free(formattedCommand);
 						//free(args);
 						formattedCommand = format_command(cmd);
-						args = parse_args(formattedCommand);
+						char * permline = parse_args(formattedCommand, args);
 						//printf("AA0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
 						execvp(args[0], args);
 
@@ -327,6 +368,10 @@ int execute(char * command){
 							free(args);
 						}*/
 
+						free(formattedCommand);
+						free(args);
+						free(permline);
+
 						exit(-1);
 					}
 
@@ -341,11 +386,15 @@ int execute(char * command){
 
 					args[x] = 0;
 
+					free(formattedCommand);
+					free(args);
+
 					exit(0);
 				}
 			}
 			/*printf("ABC\n");
 			printf("0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);*/
+			//printf("0: %s 1: %s 2: %s\n", args[0], args[1], args[2]);
 			int status = execvp(args[0], args);
 
 			if (duped > -1){
@@ -369,6 +418,10 @@ int execute(char * command){
 				free(args);
 			}*/
 
+			free(formattedCommand);
+			free(args);
+			free(permline);
+
 			exit(status);
 		}
 	} else {
@@ -391,6 +444,10 @@ int execute(char * command){
 		}*/
 		//printf("completed free\n");
 
+		free(formattedCommand);
+		free(args);
+		free(permline);
+
 		return WEXITSTATUS(status);
 	}
 }
@@ -405,7 +462,7 @@ int execute(char * command){
 		int: 0
 */
 int multiexecute(char * command){
-	char * heapCommand = calloc(strlen(command), 1);
+	char * heapCommand = calloc(strlen(command) + 1, 1);
 	strcpy(heapCommand, command);
 	//printf("heapCommand: %s\n", heapCommand);
 	char * token = strsep(&heapCommand, ";");
@@ -424,6 +481,13 @@ int multiexecute(char * command){
 	return 0;
 }
 
+/*
+	Args:
+	Function:
+		Begins shell program, loops the shell program
+	Returns:
+		0;
+*/
 int main(){
 	int running = 1;
 
