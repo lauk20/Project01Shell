@@ -5,9 +5,11 @@
 
 *Example:* ```ls -a -l``` will run ```ls -a -l```
 
+
 **Multiple Command Execution**
 
 *Example:* ```ls -a -l ; echo hello``` will run ```ls -a -l``` and then run ```echo hello```
+
 
 **Simple Redirection**
 
@@ -15,25 +17,30 @@
 
 *Example:* ```cat < file.txt``` will run ```cat``` from the data it reads from file1.txt
 
+
 **Multiple Redirections**
 
 *Example:* ```echo hello > file1.txt > file2.txt > file3.txt``` will create the files if they do not exist, but will only write to the last file (file3.txt). If any of the files that come before file3.txt exist, then they will be wiped (O_TRUNC).
 
 *Example:* ```cat < file1.txt < file2.txt < file3.txt``` will make ```cat``` read from the last given file. If any of the files do not exist, then the command will not run and output the error, "No such file or directory".
 
+
 **Simple Pipes**
 
 *Example:* ```ls | wc``` will pipe the output from ```ls``` into ```wc```. ```wc``` will use the output as its input.
 
+
 **Multiple Pipes**
 
 *Example:* ```ls | grep READ | wc -l``` will run ```ls``` and use that output as input for ```grep READ```, which will find any text that has "READ" and that result will be input for ```wc -l```. In this case, the output would be the number of files that have "READ" in their name, such as "README.md".
+
 
 **Extra Spaces Do Not Matter**
 
 *Example:* ```   cat>file1.txt >file2.txt>   file3.txt   >   file4.txt>  file5.txt   ``` will behave exactly the same as ```cat > file1.txt > file2.txt > file3.txt > file4.txt > file5.txt```
 
 *Example:* ``` ls       -a         -l     ``` is the same as ```ls -a -l```
+
 
 **Combining Redirection and Pipes**
 
@@ -52,7 +59,7 @@
 - Ctrl + D will send the program into an infinite "No such file or directory" loop. If you use it on the command line. (Or whatever shortcut you have for ```^D```)
 
 ## Function Headers
-```
+```c
 /*
 	Args:
 		char * line: string to be cleaned
@@ -64,7 +71,7 @@
 */
 char * format_command(char * line)
 ```
-```
+```c
 /*
 	Args:
 		char * line: string to be parsed into a char ** using spaces as separators
@@ -76,7 +83,7 @@ char * format_command(char * line)
 */
 char * parse_args(char * line, char ** args)
 ```
-```
+```c
 /*
 	THIS FUNCTION ENDED UP NEVER BEING USED SO IT MAY NOT WORK AS INTENDED
 		BECAUSE IT WAS BARELY TESTED.
@@ -91,7 +98,7 @@ char * parse_args(char * line, char ** args)
 */
 char * mystrsep(char ** string, char * delim, char * delim2)
 ```
-```
+```c
 /*
 	This function is useless, it just calls dup2 and returns what dup2 returns.
 	It used to do something but it has since been changed.
@@ -107,7 +114,7 @@ char * mystrsep(char ** string, char * delim, char * delim2)
 */
 int redirect_file(int this, int withThis)
 ```
-```
+```c
 /*
 	Args:
 		char * command: raw user inputted command that user wants to run
@@ -119,7 +126,7 @@ int redirect_file(int this, int withThis)
 */
 int execute(char * command)
 ```
-```
+```c
 /*
 	Args:
 		char * command: raw user inputted command that user wants to run
@@ -131,7 +138,8 @@ int execute(char * command)
 */
 int multiexecute(char * command)
 ```
-```/*
+```c
+/*
 	Args:
 	Function:
 		Begins shell program, loops the shell program
@@ -140,7 +148,7 @@ int multiexecute(char * command)
 */
 int main()
 ```
-```
+```c
 /*
   Args:
     char * path: Path you wish to cd into
@@ -151,7 +159,7 @@ int main()
 */
 int cd(char * path)
 ```
-```
+```c
 /*
   Args:
   Function:
