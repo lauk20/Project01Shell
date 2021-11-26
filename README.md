@@ -35,7 +35,7 @@
 *Example:* ```ls | grep READ | wc -l``` will run ```ls``` and use that output as input for ```grep READ```, which will find any text that has "READ" and that result will be input for ```wc -l```. In this case, the output would be the number of files that have "READ" in their name, such as "README.md".
 
 
-#### Extra Spaces Do Not Matter
+#### Extra or Lack Of Spaces Do NOT Matter
 
 *Example:* ```   cat>file1.txt >file2.txt>   file3.txt   >   file4.txt>  file5.txt   ``` will behave exactly the same as ```cat > file1.txt > file2.txt > file3.txt > file4.txt > file5.txt```
 
