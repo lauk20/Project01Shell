@@ -11,7 +11,7 @@
 *Example:* ```ls -a -l ; echo hello``` will run ```ls -a -l``` and then run ```echo hello```
 
 
-####Simple Redirection
+#### Simple Redirection
 
 *Example:* ```ls -a -l > file.txt``` will write the output into ```file.txt```
 
