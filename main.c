@@ -522,6 +522,7 @@ int main(){
 
 		if (errno){
 			printf("%s\n", strerror(errno));
+			errno = 0;
 		}
 
 		free(holder);
