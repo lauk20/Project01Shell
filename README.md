@@ -1,61 +1,61 @@
 # Project01Shell
 
 ## Features
-#### Single Command Execution
+### Single Command Execution
 
 *Example:* ```ls -a -l``` will run ```ls -a -l```
 
 
-#### Multiple Command Execution
+### Multiple Command Execution
 
 *Example:* ```ls -a -l ; echo hello``` will run ```ls -a -l``` and then run ```echo hello```
 
 
-#### Simple Redirection
+### Simple Redirection
 
 *Example:* ```ls -a -l > file.txt``` will write the output into ```file.txt```
 
 *Example:* ```cat < file.txt``` will run ```cat``` from the data it reads from file1.txt
 
 
-#### Multiple Redirections
+### Multiple Redirections
 
 *Example:* ```echo hello > file1.txt > file2.txt > file3.txt``` will create the files if they do not exist, but will only write to the last file (file3.txt). If any of the files that come before file3.txt exist, then they will be wiped (O_TRUNC).
 
 *Example:* ```cat < file1.txt < file2.txt < file3.txt``` will make ```cat``` read from the last given file. If any of the files do not exist, then the command will not run and output the error, "No such file or directory".
 
 
-#### Simple Pipes
+### Simple Pipes
 
 *Example:* ```ls | wc``` will pipe the output from ```ls``` into ```wc```. ```wc``` will use the output as its input.
 
 
-#### Multiple Pipes
+### Multiple Pipes
 
 *Example:* ```ls | grep READ | wc -l``` will run ```ls``` and use that output as input for ```grep READ```, which will find any text that has "READ" and that result will be input for ```wc -l```. In this case, the output would be the number of files that have "READ" in their name, such as "README.md".
 
 
-#### Simple Appending
+### Simple Appending
 
 *Example:* ```echo free >> file.txt``` will append "free" to file.txt like in BASH. Files will be created if needed.
 
 
-#### Multiple Appending
+### Multiple Appending
 
 *Example:* ```echo free >> file.txt >> file2.txt``` will append "free" to file2.txt like in BASH. Files will be created if needed.
 
 
-#### Changing Directories
+### Changing Directories
 
 *Example:* ```cd ..``` will change the current directory to the parent directory.
 
 
-#### Exiting
+### Exiting
 
 *Example:* ```exit``` will exit the program.
 
 
-#### Extra or Lack Of Spaces Do NOT Matter
+### Extra or Lack Of Spaces Do NOT Matter
 *Necessary spaces, such as those that separate arguments matter, but the number of spaces that separate the arguments do not matter*
 
 *Example:* <pre>```   cat>file1.txt >file2.txt>   file3.txt   >   file4.txt>  file5.txt   ```</pre> will behave exactly the same as ```cat > file1.txt > file2.txt > file3.txt > file4.txt > file5.txt```
@@ -63,7 +63,7 @@
 *Example:* <pre>``` ls       -a         -l     ```</pre> is the same as ```ls -a -l```
 
 
-#### Combining Redirection and Pipes
+### Combining Redirection and Pipes
 
 *Example:* ```cat < file.txt | cat > samecontent.txt``` will ```cat file.txt``` and then pipe the result into ```cat```, which will output the result into ```samecontent.txt```
 
