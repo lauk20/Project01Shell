@@ -56,10 +56,10 @@
 
 
 #### Extra or Lack Of Spaces Do NOT Matter
+*Necessary spaces, such as those that separate arguments matter, but the number of spaces that separate the arguments do not matter*
+*Example:* "   cat>file1.txt >file2.txt>   file3.txt   >   file4.txt>  file5.txt   " will behave exactly the same as ```cat > file1.txt > file2.txt > file3.txt > file4.txt > file5.txt```
 
-*Example:* ```   cat>file1.txt >file2.txt>   file3.txt   >   file4.txt>  file5.txt   ``` will behave exactly the same as ```cat > file1.txt > file2.txt > file3.txt > file4.txt > file5.txt```
-
-*Example:* ``` ls       -a         -l     ``` is the same as ```ls -a -l```
+*Example:* " ls       -a         -l     " is the same as ```ls -a -l```
 
 
 #### Combining Redirection and Pipes
