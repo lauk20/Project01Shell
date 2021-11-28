@@ -35,6 +35,26 @@
 *Example:* ```ls | grep READ | wc -l``` will run ```ls``` and use that output as input for ```grep READ```, which will find any text that has "READ" and that result will be input for ```wc -l```. In this case, the output would be the number of files that have "READ" in their name, such as "README.md".
 
 
+#### Simple Appending
+
+*Example:* ```echo free >> file.txt``` will append "free" to file.txt like in BASH. Files will be created if needed.
+
+
+#### Multiple Appending
+
+*Example:* ```echo free >> file.txt >> file2.txt``` will append "free" to file2.txt like in BASH. Files will be created if needed.
+
+
+#### Changing Directories
+
+*Example:* ```cd ..``` will change the current directory to the parent directory.
+
+
+#### Exiting
+
+*Example:* ```exit``` will exit the program.
+
+
 #### Extra or Lack Of Spaces Do NOT Matter
 
 *Example:* ```   cat>file1.txt >file2.txt>   file3.txt   >   file4.txt>  file5.txt   ``` will behave exactly the same as ```cat > file1.txt > file2.txt > file3.txt > file4.txt > file5.txt```
@@ -47,14 +67,17 @@
 *Example:* ```cat < file.txt | cat > samecontent.txt``` will ```cat file.txt``` and then pipe the result into ```cat```, which will output the result into ```samecontent.txt```
 
 ## Attempted Features
+- Handling quotations (" " and ' ')
 
 ## Bugs/Limitations
 - There is a limit of how long your command is; that limit is 254. (This is just a limit I put, it can always be changed if needed). If you go over this limit, expect weird behavior.
-- Tabbing will cause your command line input to be different from what you see in the terminal. Tabbing does not auto-complete
-- The arrow keys do not move around in the shell.
+- Tabbing will cause your command line input to be different from what you see in the terminal. Tabbing does not auto-complete. If you tab, expect weird behavior.
+- The arrow keys do not move around in the shell. If you use the arrow keys, expect weird behavior.
 - Ending a command with a pipe does not work like BASH.
+
   *Example:* ```cat file.txt | grep . |``` will output "No such file or directory". In BASH, it prompts for input.
 - Quotations do not work like BASH.
+
   *Example:* ```echo "hello world"``` and ```echo 'hello world'``` will output ```"hello world"``` and ```'hello world'```
 - Ctrl + D will send the program into an infinite "No such file or directory" loop. If you use it on the command line. (Or whatever shortcut you have for ```^D```)
 
