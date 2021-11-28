@@ -39,13 +39,13 @@ char * format_command(char * line){
 			}
 
 			if (line[i] == '>' || line [i] == '<' || line[i] == '|'){
-				if (i > 1 && line[i - 1] != ' '){
+				if (i > 1 && line[i - 1] != ' ' && line[i - 1] != '>'){
 					strcat(newCommand, " ");
 				}
 
 				strncat(newCommand, line + i, 1);
 
-				if (i < strlen(line) - 1 && line[i + 1] != ' '){
+				if (i < strlen(line) - 1 && line[i + 1] != ' ' && line[i + 1] != '>'){
 					strcat(newCommand, " ");
 				}
 			} else {
@@ -231,6 +231,16 @@ int execute(char * command){
 				if (strcmp(args[x], ">") == 0 && args[x] != NULL){
 					char * filename = args[x + 1];
 					int replace = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0664);
+					//printf("FILENAME: %s 0: %s, 1: %s\n", filename, args[x], args[x + 1]);
+
+					duped = dup(STDOUT_FILENO);
+					replaced = STDOUT_FILENO;
+					redirect_file(replace, STDOUT_FILENO);
+
+					args[x] = 0;
+				} else if (strcmp(args[x], ">>") == 0 && args[x] != NULL){
+					char * filename = args[x + 1];
+					int replace = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0664);
 					//printf("FILENAME: %s 0: %s, 1: %s\n", filename, args[x], args[x + 1]);
 
 					duped = dup(STDOUT_FILENO);
