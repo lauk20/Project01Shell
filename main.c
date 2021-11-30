@@ -517,6 +517,8 @@ int main(){
 		fflush(stdout);
 		//read(STDIN_FILENO, holder, 256);
 		fgets(holder, 256, stdin);
+		dup2(1, STDIN_FILENO);
+		
 
 		//printf("before: %s\n", holder);
 
