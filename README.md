@@ -90,6 +90,9 @@ $
 - Quotations do not work like BASH.
 
   *Example:* ```echo "hello world"``` and ```echo 'hello world'``` will output ```"hello world"``` and ```'hello world'```
+- Ending input with a ";" does not work like BASH.
+
+  *Example:* ```cat file.txt | grep . ;``` will output "No such file or directory". In BASH, no error is shown.
 - Ctrl + D will send the program into an infinite "No such file or directory" loop. If you use it on the command line. (Or whatever shortcut you have for ```^D```)
 
 ## Function Headers
