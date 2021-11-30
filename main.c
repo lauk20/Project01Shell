@@ -501,19 +501,19 @@ int multiexecute(char * command){
 int main(){
 	int running = 1;
 
-	printf("\033[0;31m");
-	printf("\033[1m");
+	//printf("\033[0;31m");
+	//printf("\033[1m");
 	printf("WELCOME TO SHELL\n");
-	printf("\033[0");
+	//printf("\033[0");
 
 	while (running){
 		char * holder = calloc(256, 1);
 		char wd[256];
-		printf("\033[0;31m");
+		//printf("\033[0;31m");
 		//printf("Shell $: ");
 		printf("%s\n$ ", getcwd(wd, sizeof(wd)));
 		//printf("PID: %d ", getpid());
-		printf("\033[0m");
+		//printf("\033[0m");
 		fflush(stdout);
 		//read(STDIN_FILENO, holder, 256);
 		fgets(holder, 256, stdin);
