@@ -1,5 +1,14 @@
 # Project01Shell
 
+## Instructions
+- To compile use ```make```. To run, ```make run```.
+- You should see something like this upon running the program:
+```
+WELCOME TO SHELL
+[insert path to current directory here]
+$
+```
+
 ## Features
 ### Single Command Execution
 
@@ -69,6 +78,7 @@
 
 ## Attempted Features
 - Handling quotations (" " and ' ')
+- Attempted at giving the shell a creative name. Currently it is called "Shell".
 
 ## Bugs/Limitations
 - There is a limit of how long your command is; that limit is 254. (This is just a limit I put, it can always be changed if needed). If you go over this limit, expect weird behavior.
