@@ -81,7 +81,7 @@ $
 - Attempted at giving the shell a creative name. Currently it is called "Shell".
 
 ## Bugs/Limitations
-- If you run commands by redirecting like this: ```./main < cmds.txt```, then it will not behave like BASH.
+- If you run commands by redirecting like this: ```./main < cmds.txt```, then it will not behave like ```sh < cmds.txt``` in BASH.
   1. Each line in the ```cmds.txt``` file will be run individually, it is treated as if the line were typed in the terminal.
   2. All other limitations/bugs apply on a line-by-line basis.
   *Example:*
