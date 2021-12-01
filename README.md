@@ -91,7 +91,7 @@ $
   echo hello
   echo m ; echo work
   ```
-  The first command to run will be ```ls -a -l```. It will then display the input prompt (the "[directory name here] $" prompt). Then it will run echo hello and prompt for input again. Lastly, it will run ```echo m ; echo work```. After it is finished reading and executing all the commands line-by-line, then it will resume normal behavior.
+  The first command to run will be ```ls -a -l```. It will then display the input prompt (the "[directory name here] $" prompt). Then it will run echo hello and display the prompt for input again. Lastly, it will run ```echo m ; echo work```. After it is finished reading and executing all the commands line-by-line, then it will resume normal behavior. Basically it is taking each line in the file as input each time it prompts for input.
 
   IF we were to add a semicolon ";" after the command ```echo hello```, then the program would display a "No such file or directory" because it is behaving as if we had typed ```echo hello ;``` manually, more details about this specific limitation below.
 - There is a limit of how long your command is; that limit is 254. (This is just a limit I put, it can always be changed if needed). If you go over this limit, expect weird behavior.
