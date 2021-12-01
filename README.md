@@ -91,8 +91,9 @@ $
   echo hello
   echo m ; echo work
   ```
-  The first command to run will be ```ls -a -l```. It will then bring display the input prompt (the "[directory name here] $" prompt). Then it will run echo hello and prompt for input again. Lastly, it will run ```echo m ; echo work```. After it is finished reading and executing all the commands line-by-line, then it will resume normal behavior.
-  IF we were to add a semicolon ";" after the command ```echo hello```, then the program would display a "No such file or directory", more details below.
+  The first command to run will be ```ls -a -l```. It will then display the input prompt (the "[directory name here] $" prompt). Then it will run echo hello and prompt for input again. Lastly, it will run ```echo m ; echo work```. After it is finished reading and executing all the commands line-by-line, then it will resume normal behavior.
+
+  IF we were to add a semicolon ";" after the command ```echo hello```, then the program would display a "No such file or directory" because it is behaving as if we had typed ```echo hello ;``` manually, more details about this specific limitation below.
 - There is a limit of how long your command is; that limit is 254. (This is just a limit I put, it can always be changed if needed). If you go over this limit, expect weird behavior.
 - Tabbing will cause your command line input to be different from what you see in the terminal. Tabbing does not auto-complete. If you tab, expect weird behavior.
 - The arrow keys do not move around in the shell. If you use the arrow keys, expect weird behavior.
