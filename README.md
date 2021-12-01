@@ -95,6 +95,8 @@ $
   The first command to run will be ```ls -a -l```. It will then display the input prompt (the "[directory name here] $" prompt). Then it will run echo hello and display the prompt for input again. Lastly, it will run ```echo m ; echo work```. After it is finished reading and executing all the commands line-by-line, then it will resume normal behavior. Basically it is taking each line in the file as input each time it prompts for input.
 
   IF we were to add a semicolon ";" after the command ```echo hello```, then the program would display a "No such file or directory" because it is behaving as if we had typed ```echo hello ;``` manually, more details about this specific limitation below.
+
+  3. It will stay in the program and not exit the shell. In BASH, it seems like running ```sh < commands.txt``` will run the commands and exit the program after completion. This shell does not exit the program once the commands are finished; once the commands are done, regular behavior will continue.
 - There is a newline before every output/after you press ENTER to enter the command. (i.e. there will be a newline after ```cat < file.txt``` before the actual output is printed out)
 - There is a limit of how long your command is; that limit is 254. (This is just a limit I put, it can always be changed if needed). If you go over this limit, expect weird behavior.
 - Tabbing will cause your command line input to be different from what you see in the terminal. Tabbing does not auto-complete. If you tab, expect weird behavior.
