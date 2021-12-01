@@ -24,7 +24,7 @@ $
 
 *Example:* ```ls -a -l > file.txt``` will write the output into ```file.txt```
 
-*Example:* ```cat < file.txt``` will run ```cat``` from the data it reads from file1.txt
+*Example:* ```cat < file.txt``` will run ```cat``` from the data it reads from file.txt
 
 
 ### Multiple Redirections
@@ -79,6 +79,7 @@ $
 ## Attempted Features
 - Handling quotations (" " and ' ')
 - Attempted at giving the shell a creative name. Currently it is called "Shell".
+- Attempted at making ```./main < commands.txt``` behave like ```sh < commands.txt```
 
 ## Bugs/Limitations
 - If you run commands by redirecting like this: ```./main < cmds.txt```, then it will not behave like ```sh < cmds.txt``` in BASH.
@@ -94,6 +95,7 @@ $
   The first command to run will be ```ls -a -l```. It will then display the input prompt (the "[directory name here] $" prompt). Then it will run echo hello and display the prompt for input again. Lastly, it will run ```echo m ; echo work```. After it is finished reading and executing all the commands line-by-line, then it will resume normal behavior. Basically it is taking each line in the file as input each time it prompts for input.
 
   IF we were to add a semicolon ";" after the command ```echo hello```, then the program would display a "No such file or directory" because it is behaving as if we had typed ```echo hello ;``` manually, more details about this specific limitation below.
+- There is a newline before every output/after you press ENTER to enter the command. (i.e. there will be a newline after ```cat < file.txt``` before the actual output is printed out)
 - There is a limit of how long your command is; that limit is 254. (This is just a limit I put, it can always be changed if needed). If you go over this limit, expect weird behavior.
 - Tabbing will cause your command line input to be different from what you see in the terminal. Tabbing does not auto-complete. If you tab, expect weird behavior.
 - The arrow keys do not move around in the shell. If you use the arrow keys, expect weird behavior.
