@@ -110,7 +110,7 @@ $
 - Ending input with a ";" does not work like BASH.
 
   *Example:* ```cat file.txt | grep . ;``` will output "No such file or directory". In BASH, no error is shown.
-- Ctrl + D will send the program into an infinite "No such file or directory" loop. If you use it on the command line. (Or whatever shortcut you have for ```^D```)
+- Ctrl + D will send the program into an infinite "No such file or directory" loop. If you use it on the command line. (Or whatever shortcut you have for ```^D```). As far as my testing goes, you can still use it when writing with ```cat```.
 
 ## Function Headers
 ```c
